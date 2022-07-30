@@ -22,7 +22,7 @@ import me.snowlight.springcloudorders.service.OrderService;
 
 
 @RestController
-@RequestMapping("/order-service")
+// @RequestMapping("/order-service")
 @RequiredArgsConstructor
 public class OrderController {
     private final OrderService orderService;

@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
+import me.snowlight.springcloudorders.service.KafkaProducer;
 import me.snowlight.springcloudorders.service.OrderDto;
 import me.snowlight.springcloudorders.service.OrderService;
 
@@ -25,20 +26,27 @@ import me.snowlight.springcloudorders.service.OrderService;
 // @RequestMapping("/order-service")
 @RequiredArgsConstructor
 public class OrderController {
+    private final KafkaProducer kafkaProducer;
     private final OrderService orderService;
 
     private final ModelMapper modelMapper;
+
     @GetMapping("health_check")
     public ResponseEntity check(HttpServletRequest request) {
         return ResponseEntity.ok(String.format("It's Working in Order Service on PORT %s", request.getLocalPort()));
     }
 
     @PostMapping("/{userId}/orders")
-    public ResponseEntity CreateOrder(@RequestBody RequestOrder order, @PathVariable String userId) {
-        OrderDto map = modelMapper.map(order, OrderDto.class);
-        map.setUserId(userId);
-        OrderDto orderDto = orderService.createOrder(map);
-        return ResponseEntity.status(HttpStatus.CREATED).body(modelMapper.map(orderDto, ResponseOrder.class));
+    public ResponseEntity<ResponseOrder> CreateOrder(@RequestBody RequestOrder order, @PathVariable String userId) {
+        OrderDto orderDto = modelMapper.map(order, OrderDto.class);
+        orderDto.setUserId(userId);
+        
+        OrderDto createDto = orderService.createOrder(orderDto);
+        ResponseOrder returnValue = modelMapper.map(createDto, ResponseOrder.class);
+        
+        kafkaProducer.send("example-order-topic", orderDto);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(returnValue);
     }
 
     @GetMapping("/{userId}/orders")

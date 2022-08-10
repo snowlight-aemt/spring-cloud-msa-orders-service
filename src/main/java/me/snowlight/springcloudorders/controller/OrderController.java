@@ -2,6 +2,7 @@ package me.snowlight.springcloudorders.controller;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Response;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import lombok.RequiredArgsConstructor;
 import me.snowlight.springcloudorders.service.KafkaProducer;
 import me.snowlight.springcloudorders.service.OrderDto;
+import me.snowlight.springcloudorders.service.OrderProducer;
 import me.snowlight.springcloudorders.service.OrderService;
 
 
@@ -27,6 +29,8 @@ import me.snowlight.springcloudorders.service.OrderService;
 @RequiredArgsConstructor
 public class OrderController {
     private final KafkaProducer kafkaProducer;
+    private final OrderProducer orderProducer;
+    
     private final OrderService orderService;
 
     private final ModelMapper modelMapper;
@@ -41,10 +45,17 @@ public class OrderController {
         OrderDto orderDto = modelMapper.map(order, OrderDto.class);
         orderDto.setUserId(userId);
         
-        OrderDto createDto = orderService.createOrder(orderDto);
-        ResponseOrder returnValue = modelMapper.map(createDto, ResponseOrder.class);
+        // OrderDto createDto = orderService.createOrder(orderDto);
+        // ResponseOrder returnValue = modelMapper.map(createDto, ResponseOrder.class);
         
+        
+        orderDto.setOrderId(UUID.randomUUID().toString());
+        orderDto.setTotalPrice(order.getQty() * order.getUnitPrice());
+        
+        orderProducer.send("orders", orderDto);
         kafkaProducer.send("example-order-topic", orderDto);
+
+        ResponseOrder returnValue = modelMapper.map(orderDto, ResponseOrder.class);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(returnValue);
     }

@@ -1,5 +1,8 @@
 package me.snowlight.springcloudorders.service;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
@@ -8,6 +11,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import me.snowlight.springcloudorders.service.dto.Field;
+import me.snowlight.springcloudorders.service.dto.KafkaOrderDto;
+import me.snowlight.springcloudorders.service.dto.Payload;
+import me.snowlight.springcloudorders.service.dto.Schema;
 
 @Slf4j
 @Service

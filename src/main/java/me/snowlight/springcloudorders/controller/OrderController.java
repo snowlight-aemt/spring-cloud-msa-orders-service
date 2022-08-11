@@ -44,18 +44,19 @@ public class OrderController {
     public ResponseEntity<ResponseOrder> CreateOrder(@RequestBody RequestOrder order, @PathVariable String userId) {
         OrderDto orderDto = modelMapper.map(order, OrderDto.class);
         orderDto.setUserId(userId);
-        
-        // OrderDto createDto = orderService.createOrder(orderDto);
-        // ResponseOrder returnValue = modelMapper.map(createDto, ResponseOrder.class);
-        
+
+        /* JPA */
+        OrderDto createDto = orderService.createOrder(orderDto);
+        ResponseOrder returnValue = modelMapper.map(createDto, ResponseOrder.class);
         
         orderDto.setOrderId(UUID.randomUUID().toString());
         orderDto.setTotalPrice(order.getQty() * order.getUnitPrice());
         
-        orderProducer.send("orders", orderDto);
-        kafkaProducer.send("example-order-topic", orderDto);
+        /* Kafka */
+        // orderProducer.send("orders", orderDto);
+        // kafkaProducer.send("example-order-topic", orderDto);
 
-        ResponseOrder returnValue = modelMapper.map(orderDto, ResponseOrder.class);
+        // ResponseOrder returnValue = modelMapper.map(orderDto, ResponseOrder.class);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(returnValue);
     }

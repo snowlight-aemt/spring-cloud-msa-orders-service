@@ -18,12 +18,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import me.snowlight.springcloudorders.service.KafkaProducer;
 import me.snowlight.springcloudorders.service.OrderDto;
 import me.snowlight.springcloudorders.service.OrderProducer;
 import me.snowlight.springcloudorders.service.OrderService;
 
 
+@Slf4j
 @RestController
 // @RequestMapping("/order-service")
 @RequiredArgsConstructor
@@ -42,6 +44,7 @@ public class OrderController {
 
     @PostMapping("/{userId}/orders")
     public ResponseEntity<ResponseOrder> CreateOrder(@RequestBody RequestOrder order, @PathVariable String userId) {
+        log.info("Before added orders data");
         OrderDto orderDto = modelMapper.map(order, OrderDto.class);
         orderDto.setUserId(userId);
 
@@ -58,16 +61,19 @@ public class OrderController {
 
         // ResponseOrder returnValue = modelMapper.map(orderDto, ResponseOrder.class);
 
+        log.info("After added orders data");
         return ResponseEntity.status(HttpStatus.CREATED).body(returnValue);
     }
 
     @GetMapping("/{userId}/orders")
-    public ResponseEntity<List<ResponseOrder>> getOrder(@PathVariable String userId) {
+    public ResponseEntity<List<ResponseOrder>> getOrder(@PathVariable String userId) throws Exception{
+        log.info("Before retrieve orders data");
         List<ResponseOrder> result = new ArrayList<>();
 
         orderService.getOrdersByUserId(userId).forEach(orderEntity -> 
             result.add(modelMapper.map(orderEntity, ResponseOrder.class)));
 
+        log.info("After retrieve orders data");
         return ResponseEntity.ok(result);
     }
 }

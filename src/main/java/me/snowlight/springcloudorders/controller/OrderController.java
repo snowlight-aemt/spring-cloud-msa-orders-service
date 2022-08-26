@@ -52,12 +52,12 @@ public class OrderController {
         OrderDto createDto = orderService.createOrder(orderDto);
         ResponseOrder returnValue = modelMapper.map(createDto, ResponseOrder.class);
         
-        orderDto.setOrderId(UUID.randomUUID().toString());
-        orderDto.setTotalPrice(order.getQty() * order.getUnitPrice());
+        // orderDto.setOrderId(UUID.randomUUID().toString());
+        // orderDto.setTotalPrice(order.getQty() * order.getUnitPrice());
         
         /* Kafka */
         // orderProducer.send("orders", orderDto);
-        // kafkaProducer.send("example-order-topic", orderDto);
+        kafkaProducer.send("example-order-topic", orderDto);
 
         // ResponseOrder returnValue = modelMapper.map(orderDto, ResponseOrder.class);
 
